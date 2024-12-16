@@ -34,6 +34,10 @@ server.post('/demo',async (req, res)=>{
     console.log(doc);
     res.json(doc);
 })
+server.get('/demo', async (req, res)=>{
+    const docs=await User.find({})
+    res.json(docs);
+})
 server.listen(8080,()=>{
     console.log('server started')
 })
