@@ -1,0 +1,47 @@
+
+.mt-3{
+    display:inline-block;
+    margin-top: 10px;
+    
+}
+.header-container{
+    height :50px;
+    padding: 10px 20px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+.cat-container{
+    padding: 10px 20px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+.search{
+    margin-left: 50px;
+    outline: none;
+     padding-left: 10px;/* cursor lai box bhanda ali thada rakhxa*/
+     width:200px;
+     height: 35px;
+     border: 2px solid #002f34;
+     border-radius:4px 0px 0px 4px;
+}
+.search-btn{
+    height:35px;
+    background-color:#002f34 ;
+    color: #fff;
+    border-radius:0px 4px 4px 0px;
+    outline:none;
+    border:none;
+    
+}
+.logout-btn{
+    height:35px;
+    background-color:#002f34 ;
+    color: #fff;
+    border-radius:4px;
+    outline:none;
+    border:none;
+    padding: 1px 15px;
+}
+.category{
+    color:rgba(0,47,52,1) ;
+    padding: 7px;
+    cursor: pointer;
+}
