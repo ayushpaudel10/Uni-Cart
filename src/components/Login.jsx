@@ -1,41 +1,55 @@
-import { Link } from 'react-router-dom'
+import { Link , useNavigate} from 'react-router-dom'
 import { useState } from 'react';
+import './Login.module.css';
+import logo from './Images/LOGO-removebg.png'
+import axios from "axios";
 function Login(){
-    const[form, setForm]=useState({});
-        const handleForm=(e)=>{
-          //console.log(e.target.value, e.target.name);
-          setForm({
-            ...form,
-          [e.target.name]:e.target.value
-          })
-        }
-        const handleSubmit= async (e)=>{
-          e.preventDefault();
-          const response= await fetch('http://localhost:8080/login',{
-           method:'POST',
-           body:JSON.stringify(form),
-           headers:{
-            'Content-Type':'application/json'
-           }
-          })
-         // console.log(form);
-        const data=await response.json();//response is async i.e we will need to process it and await the result for this and text can be used instead json
-            alert(data.message);
+  const navigate= useNavigate();
+  const[username,setusername]=useState(' ');//initial value of variable types
+  const[password,setpassword]=useState(' ');
+  const handleApi =()=>{
+    console.log({username:username, password:password})
+    const url='http://localhost:8080/login';
+    const data={ username, password}
 
-        console.log(data);
+    axios.post(url,data)
+    .then((res)=>{
+       console.log(res.data) ;
+       if(res.data.message)
+       {
+        if(res.data.token){
+            localStorage.setItem('token',res.data.token)
+            navigate('/'); //sending to home page
         }
-    return(<>
+        alert(res.data.message)
+       }
+    })
+    .catch((err)=>{
+        console.log(err)
+        alert('SERVER ERR')
+    })}
+    return<>
         <div className="App">
-         <form onSubmit={handleSubmit}>
-          <span>username</span>
-          <input type="text" name="username" onChange={handleForm}></input>
-          <span>password</span>
-          <input type="text" name="password" onChange={handleForm}></input>
-          <input type="submit"></input>
-         </form>
+          <div className="image-section">
+          <img src={logo} alt="Uni-Cart Logo" height="150px"/>
+          </div>
+         
+         <h1>Welcome To Uni-Kart</h1>
+          <span>Username</span>
+          <input type="text" value={username}
+            onChange={(e)=>
+                {setusername(e.target.value)
+            }} /> 
+          <span>Password</span>
+          <input type="text" value={password}
+            onChange={(e)=>
+                {setpassword(e.target.value)
+            }} /> 
+          <button onClick={handleApi}> LOGIN</button>
+         
         </div>
         <p>Click <Link to="/signup">here</Link> to signup</p>
         </>
-    )
+    
 }
 export default Login;

@@ -1,39 +1,44 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react';
-
+import axios from 'axios';
 function Signup(){
     
-    const[form, setForm]=useState({});
-    const handleForm=(e)=>{
-      //console.log(e.target.value, e.target.name);
-      setForm({
-        ...form,
-      [e.target.name]:e.target.value
+  const[username,setusername]=useState(' ');//initial value of variable types
+  const[password,setpassword]=useState(' ');//initial value of variable types
+  const handleApi =()=>{
+      console.log({username:username, password:password})
+      const url='http://localhost:8080/signup';
+      const data={ username, password}
+      axios.post(url,data)
+      .then((res)=>{
+         console.log(res.data) ;
+         if(res.data.message)
+         {
+          alert(res.data.message)
+         }
       })
-    }
-    const handleSubmit= async (e)=>{
-      e.preventDefault();
-      const response= await fetch('http://localhost:8080/signup',{
-       method:'POST',
-       body:JSON.stringify(form),
-       headers:{
-        'Content-Type':'application/json'
-       }
+      .catch((err)=>{
+          console.log(err)
+          alert('SERVER ERR')
       })
-     // console.log(form);
-    const data=await response.json();//response is async i.e we will need to process it and await the result for this and text can be used instead json
-    console.log(data);
-    }
+  }
     return (
       <div className="App">
-        <form onSubmit={handleSubmit}>
         <span>username</span>
-        <input type="text" name="username" onChange={handleForm}></input>
+        <input type="text" value={username} onChange={(e)=>
+                {setusername(e.target.value)
+            }} /> 
         <span>password</span>
-        <input type="text" name="password" onChange={handleForm}></input>
-        <input type="submit"></input>
+            <input type="text" value={password} 
+            onChange={(e)=>
+                {setpassword(e.target.value)
+            }}
+            /> 
+        <button onClick ={
+                handleApi
+            }> Signup</button>
         <p>Click <Link to="/login">here</Link> to login</p>
-       </form>
+       
       </div>
     );
   }
