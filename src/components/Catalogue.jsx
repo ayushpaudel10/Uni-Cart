@@ -9,13 +9,38 @@ function Catalogue(){
     const [isVisible, setIsVisible] = useState(false);
     const [mainCategory, setMainCategory] = useState([]);
     const [subCategory, setSubCategory] = useState([]);
+    const [isApply, setisApply]= useState(false)
     const handleClick = () => {
-        setIsVisible(true); // Update the state to make the element visible
+        setIsVisible(true); // Update the state to make the serach results visible 
       };
-      const handleMainCategoryChange = (category) => {
-        setMainCategory([...mainCategory, category]);
-        console.log(mainCategory);
-      }
+    const handleApply=()=>{
+      setisApply(true);
+    }
+      const handleMainChange = (event) => {
+          const { value, checked } = event.target;
+      
+          if (checked) {
+            // Add the value to the array if checked
+            setMainCategory((prev) => [...prev, value]);
+          } else {
+            // Remove the value from the array if unchecked
+            setMainCategory((prev) => prev.filter((item) => item !== value));
+          }
+          //console.log(mainCategory);
+        };
+        const handleSubChange = (event) => {
+          const { value, checked } = event.target;
+      
+          if (checked) {
+            // Add the value to the array if checked
+            setSubCategory((prev) => [...prev, value]);
+          } else {
+            // Remove the value from the array if unchecked
+            setSubCategory((prev) => prev.filter((item) => item !== value));
+          }
+          //console.log(subCategory);
+        };
+      
     return <>
     <Header/>
     <div>WHAT ARE YOU LOOKING FOR TODAY?</div>
@@ -29,8 +54,8 @@ function Catalogue(){
                     <input
                       type="checkbox"
                       name="mainCategory"
-                      /*checked={mainCategory === category}*/
-                      onChange={() => handleMainCategoryChange(category)}
+                      value={category}
+                      onChange={handleMainChange}
                     />
                     {category}
                   </label>
@@ -43,12 +68,8 @@ function Catalogue(){
                           <input
                             type="checkbox"
                             name="subCategory"
-                            /*checked={subCategory === sub}
-                            onChange={() => {
-                              setSubCategory(sub);
-                              console.log(sub);
-                              handleMainCategoryChange(category);
-                            }}*/
+                            value={sub}
+                            onChange={handleSubChange}
                           />
                           {sub}
                         </label>
@@ -57,10 +78,15 @@ function Catalogue(){
                 </div>
               ))}
             </div>
+            <button onClick={handleApply}>Apply</button>
+            <button>Reset</button>
             </div>
     {isVisible && (
-        <Display search={search} setIsVisible={setIsVisible} mainCategory={mainCategory} subCategory={subCategory}/>
+        <Display search={search} setIsVisible={setIsVisible}/>
       )} 
+    {isApply&& (
+        <Display search={null} setIsVisible={setIsVisible} mainCategory={mainCategory} subCategory={subCategory}/>
+    )} 
     {/*<Display search={search}/>
     <div>
         <ul>

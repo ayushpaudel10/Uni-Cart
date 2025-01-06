@@ -22,18 +22,29 @@ function Display(props){
     useEffect(()=>{
         if (props.search){
             setIsVisible(true);
-            let filteredProducts=products.filter((item)=>{
+            const searchProducts=products.filter((item)=>{
                 if(item.pname.toLowerCase().includes(String(props.search).toLowerCase())|| item.pdesc.toLowerCase().includes(String(props.search).toLowerCase())|| item.category.toLowerCase().includes(String(props.search).toLowerCase())){
                     return item; //after the first step filtered products=item and setproducts(item ) works making the home look like a filtered search
                 }
             })
-           setcproducts(filteredProducts);
+           setcproducts(searchProducts);
+           
+        }
+        else if (props.mainCategory?.length || props.subCategory?.length) {
+                setIsVisible(true);
+                console.log(props.mainCategory);
+                const filteredProductsMain = products.filter((item) =>
+                    props.mainCategory?.includes(item.category) ||
+                    props.subCategory?.includes(item.subCategory)
+                );
+            console.log(filteredProductsMain);
+            setcproducts(filteredProductsMain);
         }
         else{
             setIsVisible(false);
             //props.setIsVisible(false);
         }
-    },[props.search, products])
+    },[props.search, props.mainCategory, props.subCategory, products])
     return<>
     
         {isVisible ? (
