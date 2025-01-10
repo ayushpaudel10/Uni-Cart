@@ -128,6 +128,11 @@ p a:hover {
         /* Adjusts the form margin for smaller screens */
     }
 
+    .image-section img {
+        max-width: 250px;
+        /* Adjusts image width for smaller screens */
+    }
+
     .form h1 {
         font-size: 20px;
         /* Makes heading smaller on mobile */
@@ -149,6 +154,11 @@ p a:hover {
     .form {
         margin: 0 10%;
         /* Further reduces margin on very small screens */
+    }
+
+    .image-section img {
+        max-width: 200px;
+        /* Adjusts image width for smaller screens */
     }
 
     input[type="text"],
