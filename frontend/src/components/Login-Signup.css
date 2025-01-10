@@ -46,6 +46,7 @@
     /* Prevents form content from overflowing */
 }
 
+
 .form span {
     display: block;
     margin-bottom: 8px;
@@ -57,7 +58,7 @@
     /* Adds ellipsis if text is too long */
 }
 
-.form h1 {
+.form .heading1 {
     margin-bottom: 20px;
     font-size: 24px;
     color: #333333;
@@ -99,19 +100,19 @@ input[type="password"] {
     background-color: #e07700;
 }
 
-p {
+.paragraph {
     text-align: center;
     margin-top: 20px;
     color: #333333;
 }
 
-p a {
+.paragraph a {
     color: #ff8c00;
     text-decoration: none;
     font-weight: bold;
 }
 
-p a:hover {
+.paragraph a:hover {
     text-decoration: underline;
 }
 
@@ -133,7 +134,7 @@ p a:hover {
         /* Adjusts image width for smaller screens */
     }
 
-    .form h1 {
+    .form .heading1 {
         font-size: 20px;
         /* Makes heading smaller on mobile */
     }
@@ -172,7 +173,7 @@ p a:hover {
         /* Reduces padding on smaller screens */
     }
 
-    p {
+    .paragraph {
         font-size: 14px;
         /* Reduces text size for smaller screens */
     }

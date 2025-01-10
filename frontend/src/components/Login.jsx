@@ -37,7 +37,7 @@ function Login() {
                     <img src={logo} alt="Uni-Cart Logo" />
                 </div>
                 <div className='form'>
-                    <h1> Welcome To Uni-Kart</h1>
+                    <h1 className='heading1'> Welcome To Uni-Kart</h1>
                     <div>
                         <span>Email</span>
                         <input type="text" value={username}
@@ -53,7 +53,7 @@ function Login() {
                             }} />
                         <button className='login-signup-button' onClick={handleApi}> Login</button>
                     </div>
-                    <p>
+                    <p className='paragraph'>
                         Don't Have Account? Click <Link to="/signup">here</Link>
                     </p>
                 </div>
