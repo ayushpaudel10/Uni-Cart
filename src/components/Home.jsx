@@ -15,7 +15,7 @@ function Home(){
     return<>
         <Header/>
         <div>Products:</div>
-        <Display search={null}/>
+        <Display search ={null}/>
     </>
     
 }

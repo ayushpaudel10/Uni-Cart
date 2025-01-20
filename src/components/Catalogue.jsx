@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import Header from "./Header";
-import Home from "./Home";
-import axios from "axios";
 import Display from "./Display";
 import Categories from "./CategoriesList";
 function Catalogue(){
@@ -10,42 +8,52 @@ function Catalogue(){
     const [mainCategory, setMainCategory] = useState([]);
     const [subCategory, setSubCategory] = useState([]);
     const [isApply, setisApply]= useState(false)
-    const handleClick = () => {
-        setIsVisible(true); // Update the state to make the serach results visible 
+    const handleClick = (e) => {
+      setsearch(e.target.value);
+        setIsVisible(true); 
+        setisApply(false);
+        // Update the state to make the serach results visible 
       };
-    const handleApply=()=>{
-      setisApply(true);
-    }
+    //const handleApply=()=>{
+      //setisApply(true);
+      //setIsVisible(false);
+    //}
       const handleMainChange = (event) => {
           const { value, checked } = event.target;
-      
+        
           if (checked) {
+            setIsVisible(false);
+            setisApply(true); 
+            setsearch([]);
             // Add the value to the array if checked
             setMainCategory((prev) => [...prev, value]);
           } else {
             // Remove the value from the array if unchecked
             setMainCategory((prev) => prev.filter((item) => item !== value));
           }
-          //console.log(mainCategory);
+          console.log(value);
         };
         const handleSubChange = (event) => {
           const { value, checked } = event.target;
       
           if (checked) {
+            setIsVisible(false); 
+            setisApply(true);
+            setsearch([]);
             // Add the value to the array if checked
             setSubCategory((prev) => [...prev, value]);
           } else {
             // Remove the value from the array if unchecked
             setSubCategory((prev) => prev.filter((item) => item !== value));
           }
-          //console.log(subCategory);
+          console.log(value);
         };
       
     return <>
     <Header/>
     <div>WHAT ARE YOU LOOKING FOR TODAY?</div>
-    <input className='search' type='text' value={search} onChange={(e)=>setsearch(e.target.value)}/>
-    <button className='search-btn' onClick={handleClick}>SEARCH</button> 
+    <input className='search' type='text' value={search} onChange={(e)=>handleClick(e)}/>
+    {/* <button className='search-btn' onClick={handleClick}>SEARCH</button>   */}
     <div>
         <div className="main">
               {Object.keys(Categories).map((category) => (
@@ -78,23 +86,13 @@ function Catalogue(){
                 </div>
               ))}
             </div>
-            <button onClick={handleApply}>Apply</button>
-            <button>Reset</button>
             </div>
     {isVisible && (
-        <Display search={search} setIsVisible={setIsVisible}/>
+        <Display search={search} mainCategory={null} subCategory={null}/>
       )} 
-    {isApply&& (
-        <Display search={null} setIsVisible={setIsVisible} mainCategory={mainCategory} subCategory={subCategory}/>
-    )} 
-    {/*<Display search={search}/>
-    <div>
-        <ul>
-            {result.map((item, index)=>(
-                <li key={index}>{item.pname}</li>
-            ))}
-        </ul>
-    </div>*/}
+    {isApply &&(
+      <Display search={null} mainCategory={mainCategory} subCategory={subCategory}/>
+    )}
     </>
 }
 export default Catalogue;

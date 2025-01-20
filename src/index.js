@@ -9,11 +9,14 @@ import Login from './components/Login';
 import Profile from './components/Profile';
 import AddProduct from './components/AddProduct';
 import Catalogue from './components/Catalogue';
+import WishList from './components/WishList';
+
 import{
   createBrowserRouter,
   RouterProvider,
   Route,
 } from "react-router-dom";
+
 const router= createBrowserRouter([
   {
     path: "/",
@@ -38,7 +41,11 @@ const router= createBrowserRouter([
   {
     path:"/catalogue",
     element: <Catalogue/>
-  }
+  },
+  {
+    path:"/wishlist",
+    element: <WishList/>
+  },
 ])
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
