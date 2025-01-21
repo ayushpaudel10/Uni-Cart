@@ -1,24 +1,45 @@
-import { useEffect } from "react";
-import{ useNavigate, Link } from 'react-router-dom';
 import Header from "./Header";
+import { useEffect } from "react";
+import{ useNavigate, Link , useParams} from 'react-router-dom';
 import { useState } from "react";
 import axios from "axios";
 import './Additems.css'
 import Categories from "./CategoriesList";
-function AddProduct(){
+
+    
+
+function EditProduct(){
     const navigate= useNavigate();
-    const[pname,setpname]=useState(' ');
-    const[pdesc,setpdesc]=useState(' ');
-    const[price,setprice]=useState(' ');
+    const[pname,setpname]=useState('');
+    const[pdesc,setpdesc]=useState('');
+    const[price,setprice]=useState('');
     const [mainCategory, setMainCategory] = useState("");
     const [subCategory, setSubCategory] = useState("");
     const [swap, setswap] = useState(false);
-    const[pimage,setpimage]=useState(' ');
-    const url='http://localhost:8080/add-product';
+    const[pimage,setpimage]=useState('');
+    const [product, setProduct]=useState();
+    const p= useParams();
     useEffect(()=>{
         if(!localStorage.getItem('token')){
             navigate('/login') 
         }
+        const url= 'http://localhost:8080/get-product/'+ p.productid;
+        axios.get(url)
+        .then((res)=>{
+            if (res.data.product){
+                setProduct(res.data.product);
+                const product=res.data.product;
+                console.log(res.data.product);
+                setpname(product.pname);
+                setpdesc(product.pdesc);
+                setprice(product.price);
+                setMainCategory(product.category);
+                setSubCategory(product.subCategory);
+                setpimage(product.pimage);
+                setswap(product.swap);
+            }
+        })
+        
     },[])
     const handleMainCategoryChange = (category) => {
       setMainCategory(category);
@@ -28,6 +49,7 @@ function AddProduct(){
     
 
     const handleApi=()=>{
+        const url='http://localhost:8080/edit-product';
         const formData= new FormData();
         formData.append('pname',pname)
         formData.append('pdesc',pdesc)
@@ -54,7 +76,7 @@ function AddProduct(){
         <div>
             <Header />
             <div className="p-3"> 
-            <h2> ADD PRODUCT HERE </h2>
+            <h2> EDIT PRODUCT HERE </h2>
             <label>Product Name</label>
             <input className="form-control" type="text" value={pname}
             onChange={(e)=>{
@@ -99,7 +121,7 @@ function AddProduct(){
                             checked={subCategory === sub}
                             onChange={() => {
                               setSubCategory(sub);
-                              console.log(sub);
+                              console.log(subCategory);
                               handleMainCategoryChange(category);
                             }}
                           />
@@ -131,4 +153,4 @@ function AddProduct(){
       </div>
     </>
 }
-export default AddProduct;
+export default EditProduct;

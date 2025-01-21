@@ -10,6 +10,8 @@ import Profile from './components/Profile';
 import AddProduct from './components/AddProduct';
 import Catalogue from './components/Catalogue';
 import WishList from './components/WishList';
+import Myproducts from './components/Myproducts';
+import EditProduct from './components/EditProduct';
 
 import{
   createBrowserRouter,
@@ -46,6 +48,14 @@ const router= createBrowserRouter([
     path:"/wishlist",
     element: <WishList/>
   },
+  {
+    path:"/my-products",
+    element: <Myproducts/>
+  },
+  {
+    path:"/product-edit/:productid",
+    element: <EditProduct/>
+  }
 ])
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

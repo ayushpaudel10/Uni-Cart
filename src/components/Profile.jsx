@@ -50,7 +50,7 @@ function Profile(){
                             onChange={(e) => {
                                 setConfirm(e.target.value)}}/><br/>
     <button onClick={changepassword}>Submit</button>
-    <p>See my products</p>
+    <Link to="/my-products">See my products</Link>
     <Link to="/wishlist">WishList</Link>
     <p>Add to cart list</p>
     <button onClick={handleLogout}>Logout</button>

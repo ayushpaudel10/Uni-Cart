@@ -49,6 +49,7 @@ const Products = mongoose.model('Products', {
   subCategory: String,
   pimage: String,
   swap: Boolean,
+  userId: String
 });
 server.post('/signup', async (req, res) => {
   const username = req.body.username;
@@ -106,6 +107,7 @@ server.post('/add-product', upload.single('pimage'), (req, res) => {
   const subCategory = req.body.subCategory;
   const pimage = req.file.path;
   const swap = req.body.swap;
+  const userId= req.body.userId;
   const product = new Products({
     pname,
     pdesc,
@@ -114,6 +116,7 @@ server.post('/add-product', upload.single('pimage'), (req, res) => {
     subCategory,
     pimage,
     swap,
+    userId
   });
   product.save().then(() => {
     res.status(200).send({ message: 'Product saved' });
@@ -158,29 +161,40 @@ server.post('/change-password', async (req, res) => {
     const user = await Users.findOne({ _id: id });
 
     if (!user) {
-      return res.status(404).send({ message: 'User not found' });
+      return res.send({ message: 'User not found' });
     }
-
-    // Compare the current password with the hashed password
     const isMatch = await bcrypt.compare(oldpassword, user.password);
 
     if (!isMatch) {
       return res.send({ message: 'Current password is incorrect' });
     }
-
-    // Hash the new password
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-
-    // Update the user's password in the database
-      Users.updateOne(
+      await Users.updateOne(
       { _id: id },
       { $set: { password: hashedPassword } }
     );
-
-    res.status(200).send({ message: 'Password changed successfully' });
+    res.send({ message: 'Password changed successfully' });
   } catch (err) {
-    res.status(500).send({ message: 'Server error' });
+    res.send({ message: 'Server error' });
   }
+});
+server.post('/my-items', (req, res) => {
+  Products.find({ userId: req.body.userId })
+    .then((result) => {
+      res.send({ message: 'Products found', myproducts: result });
+    })
+    .catch((err) => {
+      res.send({ message: 'Server error' });
+    });
+});
+server.get('/get-product/:pid', (req, res)=>{
+  Products.findOne({ _id: req.params.pid })
+  .then((result) => {
+    res.send({ message: 'Products found', product: result });
+  })
+  .catch((err) => {
+    res.send({ message: 'Server error' });
+  });
 });
 server.listen(8080, () => {
   console.log('server started');
