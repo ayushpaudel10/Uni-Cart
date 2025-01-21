@@ -10,9 +10,8 @@ import Profile from './components/Profile';
 import AddProduct from './components/AddProduct';
 import Catalogue from './components/Catalogue';
 import WishList from './components/WishList';
-import Myproducts from './components/Myproducts';
 import EditProduct from './components/EditProduct';
-
+import Myproductspage from './components/Myproductspage';
 import{
   createBrowserRouter,
   RouterProvider,
@@ -50,7 +49,7 @@ const router= createBrowserRouter([
   },
   {
     path:"/my-products",
-    element: <Myproducts/>
+    element: <Myproductspage/>
   },
   {
     path:"/product-edit/:productid",

@@ -2,6 +2,8 @@ import Header from "./Header";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
+import Myproducts from "./Myproducts"
+import WishList from "./WishList";
 function Profile(){
     const [newPassword, setnewpassword]=useState("");
     const [confirm, setConfirm]=useState("");
@@ -51,7 +53,9 @@ function Profile(){
                                 setConfirm(e.target.value)}}/><br/>
     <button onClick={changepassword}>Submit</button>
     <Link to="/my-products">See my products</Link>
+    <Myproducts profile={true} />
     <Link to="/wishlist">WishList</Link>
+    <WishList wishlist={true}/>
     <p>Add to cart list</p>
     <button onClick={handleLogout}>Logout</button>
     </>
