@@ -1,0 +1,10 @@
+.cart-display{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.cart-card{
+    display: flex;
+    flex-direction: column;
+    
+}

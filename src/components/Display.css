@@ -1,0 +1,70 @@
+.display {
+    position: relative; 
+    display: inline-block;
+}
+
+.icon-con {
+    position: absolute; 
+    top: 20px;
+    right: 10px;
+    background: white;
+    border-radius: 50%;
+    padding: 5px;
+    cursor: pointer;
+    z-index: 1; 
+}
+
+.icons {
+    font-size: 32px;
+    color: #ddd; 
+}
+
+.icons:hover {
+    color: darkred;
+}
+.card{
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .pagination{
+        padding: 10px;
+        margin: 15px 0;
+        display: flex;
+        justify-content: center;
+    }
+    .pagination > span{
+        padding: 15px 20px;
+        border: 1px solid gray;
+        cursor: pointer;
+    }
+    .pagination__disable{
+        opacity: 0;
+      }
+      
+      .pagination__selected{
+        background-color: rgb(220, 220, 220);
+      }
+
+/* .card{
+    border: 1px solid #ccc;
+    padding: 20px;       
+    margin: 20px;        
+    border-radius: 10px; 
+    display: flex;
+        justify-content: center;
+        flex-wrap: wrap; 
+    text-align: center;    
+    width: 200px;           
+    background-color: #f9f9f9
+}  */
+
+.product-image {
+    width: 100%;            /* Make the image fill the container width */
+    height: auto;           /* Maintain aspect ratio */
+}
+.display img {
+    width: 100%;
+    border-radius: 5px;
+  }
+  
