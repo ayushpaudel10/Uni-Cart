@@ -1,0 +1,100 @@
+/* .display {
+    position: relative; 
+    display: inline-block;
+    border: 2px solid black;
+} */
+
+.card1{
+    display: flex;
+    margin-left: 20px;
+    padding-left: 50px;
+    margin-right: 0px;
+    justify-content: start;
+    flex-wrap: wrap;
+    gap: 50px;
+    overflow-x: hidden !important;
+    white-space: nowrap;
+    /* width: max-content; */
+    /* background-color: #d17609; */
+}
+
+.display1 {
+    display: flex;
+    gap: 1px;
+    flex-direction: column;
+    /* border: 2px solid  #d17609; */
+    border-radius: 8px;
+    width: 260px; /* Match the image width */
+    padding-right: 0px;
+    padding: 10px;
+    overflow: hidden;
+    background: linear-gradient(to top, #fdf2e6 0%, #ffffff 100%);
+}
+
+.icon-conn {
+    position: relative !important;
+    /* width: 100% !important; */
+}
+
+.product-image1 {
+    width: 100% !important; /* Ensure image fills the container */
+    height: 300px !important; /* Maintain aspect ratio */
+    display: block; /* Remove unwanted gaps */
+    border-radius: 8px; /* Optional styling */
+    object-fit: cover !important;
+    margin-right: 10px;
+}
+
+.icons1 {
+    position: absolute !important;
+    /* top: 10px;
+    left: 10px; */
+    color: gray;
+    font-size: 24px;
+    cursor: pointer;
+    /* background: rgba(255, 255, 255, 0.7); */
+    padding: 10px;
+    border-radius: 50%;
+}
+
+.icons1:hover{
+    color: rgb(247, 50, 155);
+}
+
+.product-name1{
+    color: black;
+    font-size: 17px;
+    text-align: left;
+    margin-bottom: -10px;
+}
+
+.product-name1:hover{
+    color: #3a5635;
+    cursor: pointer;
+}
+
+.product-price1{
+    font-size: medium;
+    margin-bottom: 30px;
+}
+
+.view-all{
+    height: 50px;
+    width: 50px;
+    margin-top: 14%;
+    border-radius: 100px;
+    transition: all 0.3s ease 0s;
+    /* border: 2px solid #d17609; */
+}
+
+.view-all:hover{
+    /* border: 2px solid #000; */
+  transform: translateY(-7px);
+  box-shadow: 0px 3px 2px #f6dde5;
+  cursor: pointer;;
+}
+
+.view-all:active {
+    transform: translateY(-1px);
+    transform: scale(0.95);
+  }

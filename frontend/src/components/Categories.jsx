@@ -1,13 +1,11 @@
 import{ Link, useNavigate } from 'react-router-dom';
 import './Header.css'
 import categories from './CategoriesList';
-
-
 function Categories(props){
+  
     // const handleCategory=(value)=>{
     //     console.log(value)
     // }
-
     return(
         <div className='cat-container'> 
           <div>

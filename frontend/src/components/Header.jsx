@@ -1,30 +1,41 @@
-import{ Link, useNavigate } from 'react-router-dom';
 import './Header.css'
+import final_logo_processed from './Images/final_logo_processed.png'
+import { Link, useNavigate} from 'react-router-dom'
+import cart from './Images/cart.png'
 
-
-function Header(props){
-    const navigate= useNavigate()
-    const handleLogout=()=>{
-        localStorage.removeItem('token');
-        navigate('/login');
+function Header(){
+    const navigate = useNavigate()
+    const handleAdd=()=>{
+        if(!localStorage.getItem('token')){
+            navigate('/login')
+        }
+        else{
+            navigate('/add-product')
+        }
     }
-    return(
-        <div className='header-container'> 
-            <div className="header">
-                <Link to="/">HOME</Link>
-                <input className='search' type='text' value={props && props.search} 
-                onChange={(e)=> props.handlesearch && props.handlesearch(e.target.value)}
-                />
-                <button className='search-btn' onClick={()=>props.handleClick && props.handleClick()}>SEARCH</button>  
-            </div>
-            <div>
-                {/*here we will show the login link only if the user doesn't have a valid token as if there is a valid token no need of login buttonn in header */}
-                {!localStorage.getItem('token') ?
-                 <Link to="/login"> LOGIN </Link>:
-                 <button className='logout-btn' onClick={handleLogout}>LOGOUT</button>
-                 } 
-                 </div>
+    const handleCart=()=>{
+        if(!localStorage.getItem('token')){
+            navigate('/login')
+        }
+        else{
+            navigate('/cart')
+        }
+    }
+    return(<>
+        <div className="header"><Link to="/"><img src={final_logo_processed} alt="Uni-Cart Logo" height="90px" width="170px" padding="10px"/> </Link><p className='logo'></p>
+        <div className='links'>
+        <Link to="/" className='nav-link'>Home</Link>
+        <Link to="/catalogue" className='nav-link'>Catalogue</Link>
+        
+        {!localStorage.getItem('token')?
+        <Link to="/login" className='nav-link'>Login </Link>:
+        <Link to="/profile" className='nav-link'>Profile</Link>}
+        
         </div>
+        <img  className='cart-icon' src={cart} width='40px' height='40px'onClick={handleCart}/>
+        <button onClick={handleAdd}>+Add Items</button>
+        </div>
+        </>
     )
 }
 export default Header;

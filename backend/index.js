@@ -1,162 +1,621 @@
-// //console.log("hello Js");
-const express=require('express');
-const cors=require('cors');
-const path=require('path');
-const bodyParser=require('body-parser');
-var jwt = require('jsonwebtoken');
-const multer  = require('multer')
-const storage = multer.diskStorage({
- destination: function (req, file, cb) {
-   cb(null, 'uploads')
- },
- filename: function (req, file, cb) {
-   const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-   cb(null, file.fieldname + '-' + uniqueSuffix)
- }
-})
-
-const upload = multer({ storage: storage })
-const app=express()
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));//this is must if we want the image to be seen in the frontend
-app.use(cors());
-app.use(express.json());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-const port=8000
-
-// // getting-started.js
-//needed for all login and stuff so written outside
+const express = require('express');
+const cors = require('cors');
 const mongoose = require('mongoose');
-//connection to mongodb
+const bodyParser = require('body-parser');
+var jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
+const bcrypt = require('bcrypt'); // Add bcrypt for password hashing
+const nodemailer = require('nodemailer');
+const saltRounds = 10; // Define salt rounds for bcrypt
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads');
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix);
+  },
+});
+const upload = multer({ storage: storage });
+
+const server = express();
+server.use(bodyParser.json());
+server.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+server.use(cors());
+server.use(express.json());
+server.use(bodyParser.json());
+server.use(bodyParser.urlencoded({ extended: false }));
+
 main().catch(err => console.log(err));
 
 async function main() {
- await mongoose.connect('mongodb://127.0.0.1:27017/test1');//http like mongodb 127.. ip address 27017 local host kind
- console.log('db connected');
+  await mongoose.connect('mongodb://127.0.0.1:27017/demo');
+  console.log('db connected');
 }
-//mongoose.connect('mongodb://127.0.0.1:27017/test1');
-const Users= mongoose.model('Users', {
- username:String,
- password:String
-});//table created in mongoose
-const Products= mongoose.model('Products', {
- pname:String,
- pdesc:String,
- price:String,
- category:String,
- pimage:String, //path of the uploads is stored thus string type
-});//table created in mongoose
 
-
-// const userSchema = new mongoose.Schema({
-//     username: String,
-//     password: String  //validation that the input or data is of string kind
-//   });
-
-//   const User = mongoose.model('User', userSchema);
-
-
-// const server=express();
-// server.use(bodyParser.json());//to understand the body sent by the client
-// server.use(cors());
-// //server.get('/demo', (req, res)=>{
-// server.post('/demo',async (req, res)=>{
-//     // console.log(req.body);
-//     // res.json(req.body);//sends object
-//     // //res.send("hello");//sends text or string
-//     let user=new User();
-//     user.username=req.body.username;
-//     user.password=req.body.password;
-//     const doc=await user.save();
-//     console.log(doc);
-//     res.json(doc);
-// })
-// server.get('/demo', async (req, res)=>{
-//     const docs=await User.find({})
-//     res.json(docs);
-// })
-// server.listen(8080,()=>{
-//     console.log('server started')
-// })
-app.post('/add-product', upload.single('pimage'),( req,res)=>{
-    console.log(req.body);
-    console.log(req.file.path);
-    const pname= req.body.pname;
-    const pdesc= req.body.pdesc;
-    const price= req.body.price;
-    const category= req.body.category;
-    const pimage= req.file.path;
-
-    const product=new Products({pname,
-     pdesc, price, category, pimage
-   });
-   product.save().then(()=> {
-     res.status(200).send({message:'saved'})
-     })
-     .catch(()=>{
-       res.send({message:'server err'})
-     })
-    
-})
-app.get('/get-product',(req,res)=>{
- Products.find()
-   .then((result)=>{
-     console.log(result,"user data")
-     res.status(200).send({message:'product found',products:result})
-
-   })
- .catch((err)=>{
-   res.send({message:'server err'})
- })
-})
-app.post('/signup',(req,res)=>{
- const username= req.body.username;
- const password= req.body.password;
-const user=new Users({username:username,
- password: password
+const Users = mongoose.model('Users', {
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  name: { type: String, required: true },
+  number: { type: String, required: true },
+  isVerified: { type: Boolean, default: false },
+  verificationCode: String,
+  favourites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Products' }],
+  cart: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Products' }]
 });
-console.log(req.body);
-// const user=new Users({username:'sad',
-//   password: '123'
-// });
-user.save().then(()=> {
-res.status(200).send({message:'saved'})
+
+const Products = mongoose.model('Products', {
+  pname: String,
+  pdesc: String,
+  price: String,
+  category: String,
+  subCategory: String,
+  pimage: String,
+  swap: Boolean,
+  userId: String,
+  buyer: String,
+  isSold: { type: Boolean, default: false },
+  isSwapaccepted: { type: Boolean, default: false },
+  isSwapdisplay: { type: Boolean, default: false },
+  swapproduct: String
+});
+// Configure nodemailer transporter
+const transporter = nodemailer.createTransport({
+  service: 'Gmail', // Or use your email provider
+  auth: {
+    user: 'ayushpaudel159@gmail.com', // Replace with your email
+    pass: 'ntii wiqd qexw zzem', // Replace with your email password or app password
+  },
+  logger: true, // Enable logging
+  debug: true   // Show debug output
+});
+server.post('/signup', async (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  const name = req.body.namee;
+  const number = req.body.number;
+  try {
+    const existingUser = await Users.findOne({ username });
+    if (existingUser) {
+      return res.status(210).send({ message: 'User already exists' });
+    }
+    // Hash the password using bcrypt
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const verificationCode = Math.floor(1000 + Math.random() * 9000).toString(); // Generate a 4-digit code
+    const user = new Users({
+      username: username,
+      password: hashedPassword,
+      isVerified: false,
+      verificationCode: verificationCode,
+      name: name,
+      number: number,
+    });
+
+    await user.save();
+
+    const mailOptions = {
+      from: 'ayushpaudel159@gmail.com',
+      to: username,
+      subject: 'Email Verification',
+      text: `Your verification code is: ${verificationCode}`,
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error(error);
+        return res.status(500).send({ message: 'Error sending verification email' });
+      }
+      console.log('Email sent: ' + info.response);
+      res.status(200).send({ message: 'Verification code sent to email.' });
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Server error' });
+  }
+});
+server.post('/verify-email', async (req, res) => {
+  const { username, verificationCode } = req.body;
+  try {
+    const user = await Users.findOne({ username });
+    if (!user) {
+      return res.status(404).send({ message: 'User not found' });
+    }
+    if (user.verificationCode === verificationCode) {
+      user.isVerified = true;
+      user.verificationCode = null; // Clear the code after successful verification
+      await user.save();
+      res.status(200).send({ message: 'Email verified successfully' });
+    } else {
+      res.status(400).send({ message: 'Invalid verification code' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Server error' });
+  }
+});
+server.post('/login', async (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+
+  try {
+    const user = await Users.findOne({ username: username });
+
+    if (!user) {
+      return res.status(404).send({ message: 'User not found' });
+    }
+    if (!user.isVerified) {
+      return res.status(400).send({ message: 'Please verify your email before logging in.' });
+    }
+    // Compare the provided password with the hashed password
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (isMatch) {
+      const token = jwt.sign(
+        { data: user },
+        'MYKEY',
+        { expiresIn: '1h' }
+      );
+      res.status(200).send({ message: 'Login success', token: token, userId: user._id });
+    } else {
+      res.send({ message: 'Password is incorrect' });
+    }
+  } catch (err) {
+    res.status(500).send({ message: 'Server error' });
+  }
+});
+server.post('/add-product', upload.single('pimage'), (req, res) => {
+  //console.log(req.body);
+  //console.log(req.file.path);
+  const pname = req.body.pname;
+  const pdesc = req.body.pdesc;
+  const price = req.body.price;
+  const category = req.body.category;
+  const subCategory = req.body.subCategory;
+  const pimage = req.file.path;
+  const swap = req.body.swap;
+  const userId = req.body.userId;
+  const buyer = "";
+  const swapproduct = "";
+  const product = new Products({
+    pname,
+    pdesc,
+    price,
+    category,
+    subCategory,
+    pimage,
+    swap,
+    userId,
+    buyer,
+    swapproduct
+  });
+  product.save().then(() => {
+    res.send({ message: 'Product saved' });
+  })
+    .catch(() => {
+      res.send({ message: 'Server error' });
+    });
+});
+server.get('/get-products', (req, res) => {
+  Products.find({ isSold: false })
+    .then((result) => {
+      //console.log(result, "product data");
+      res.status(200).send({ message: 'Products found', products: result });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: 'Server error' });
+    });
+});
+server.post('/like-product', (req, res) => {
+  let productId = req.body.productId;
+  let userId = req.body.userId;
+  Users.updateOne({ _id: userId }, { $addToSet: { favourites: productId } })
+    .then(() => {
+      res.status(200).send({ message: 'Favourites are saved' });
+    })
+    .catch(() => {
+      res.status(500).send({ message: 'Server error' });
+    });
+});
+server.post('/liked-products', (req, res) => {
+  Users.findOne({ _id: req.body.userId }).populate('favourites')
+    .then((result) => {
+      res.status(200).send({ message: 'Products found', products: result.favourites });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: 'Server error' });
+    });
+});
+server.post('/change-password', async (req, res) => {
+  try {
+    const { id, oldpassword, newPassword } = req.body;
+    const user = await Users.findOne({ _id: id });
+
+    if (!user) {
+      return res.send({ message: 'User not found' });
+    }
+    const isMatch = await bcrypt.compare(oldpassword, user.password);
+
+    if (!isMatch) {
+      return res.send({ message: 'Current password is incorrect' });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+    await Users.updateOne(
+      { _id: id },
+      { $set: { password: hashedPassword } }
+    );
+    res.send({ message: 'Password changed successfully' });
+  } catch (err) {
+    res.send({ message: 'Server error' });
+  }
+});
+
+
+server.post('/get-user', async (req, res) => {
+  Users.findOne({ _id: req.body.userId })
+    .then((result) => {
+      res.send({ username: result.name, email: result.username });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: 'Server error' });
+    });
+});
+server.post('/my-items', async (req, res) => {
+  try {
+    console.log(req.body.userId);
+    const userItems = await Products.find(
+      { userId: req.body.userId });
+    console.log(userItems);
+    const buyerIds = userItems.map(order => order.buyer).filter(buyer => buyer && mongoose.Types.ObjectId.isValid(buyer));
+    console.log(buyerIds);
+    const buyers = await Users.find({ _id: { $in: buyerIds } });
+    console.log(buyers);
+    const buyerInfo = buyers.map(buyer => ({
+      _id: buyer._id,
+      name: buyer.name, // replace 'name' with the actual attribute you want
+      username: buyer.username, // replace 'email' with the actual attribute you want
+      number: buyer.number,
+    }));
+    res.send({ message: "Orders", myItems: userItems, buyers: buyerInfo });
+
+  }
+  catch (error) {
+    console.error('Error fetching orders or users:', error);
+    res.status(500).send({ message: 'Server error' });
+  }
+});
+server.get('/get-product/:pid', (req, res) => {
+  Products.findOne({ _id: req.params.pid })
+    .then((result) => {
+      res.send({ message: 'Products found', product: result });
+    })
+    .catch((err) => {
+      res.send({ message: 'Server error' });
+    });
+});
+server.get('/search', (req, res) => {
+  let search = req.query.search;
+  Products.find({
+    $or: [           //check for multiple criterias with dollar or in mongodb
+      { pname: { $regex: search } },
+      { pdesc: { $regex: search } },
+      { price: { $regex: search } }
+    ],
+  })
+    .then((results) => {
+      //console.log(result,"user data")
+      res.status(200).send({ message: 'success', products: results })
+
+    })
+    .catch((err) => {
+      res.send({ message: 'server err' })
+    })
 })
-.catch(()=>{
- res.send({message:'server err'})
-})
-})
-app.post('/login',(req,res)=>{
- const username= req.body.username;
- const password= req.body.password;
-// const user=new Users({username:username,
-//   password: password
-// });
-// console.log(req.body);
-// the user model that we made we are using that to find the username
-Users.findOne({username:username})
-.then((result)=> {
- console.log(result,"user data")
- if (!result){
-   res.status(200).send({message:'user not found'})
- }
- else{
-   if(result.password==password){
-     const token=jwt.sign({
-       data: result
-     }, 'MYKEY', { expiresIn: '1h' });
-     res.status(200).send({message:'find success', token:token})
-   }
-     if(result.password!=password){
-       res.status(200).send({message:'password is incorrect'})
-   }
- }
+server.get('/apply', async (req, res) => {
+  // const maincategory = req.query.mainCategory; 
+  // const subCategory = req.query.subCategory;
+  const maincategory = [].concat(req.query.mainCategory || []);
+  const subCategory = [].concat(req.query.subCategory || []);
+  const swap = req.query.swap;
+  console.log(maincategory);
+  console.log(subCategory);
+  console.log(swap);
+  // if(swap && !maincategory && !subCategory){
+  if (swap === 'true') {
+    if (maincategory.length === 0 && subCategory.length === 0) {
+      await Products.find({ swap: swap })
+        .then((results) => {
+          console.log(1);
+          res.status(200).send({ message: 'success', products: results })
+        })
+        .catch((err) => {
+          res.send({ message: 'server err' })
+        })
+    }
+    else if (maincategory || subCategory) {
+      await Products.find({
+        $and: [
+          { swap: swap },  // Ensure 'swap' condition is always applied
+          {
+            $or: [
+              { category: { $in: maincategory } },
+              { subCategory: { $in: subCategory } }
+            ]
+          }
+        ]
+      })
+        .then((results) => {
+          console.log(2);
+          res.status(200).send({ message: 'success', products: results })
+
+        })
+        .catch((err) => {
+          res.send({ message: 'server err' })
+        })
+    }
+  }
+  else if (swap === "false") {
+    await Products.find({
+      $or: [
+        { category: { $in: maincategory } },
+        { subCategory: { $in: subCategory } }
+      ]
+    })
+      .then((results) => {
+        console.log(3);
+        res.status(200).send({ message: 'success', products: results })
+
+      })
+      .catch((err) => {
+        res.send({ message: 'server err' })
+      })
+  }
+}
+)
+server.post('/delete-product', (req, res) => {
+  const pid = req.body.pid;
+  const userId = req.body.userId;
+  Products.findOne({ _id: pid })
+    .then((result) => {
+      if (result.userId === userId) {
+        Products.deleteOne({ _id: pid })
+          .then((deleteresult) => {
+            if (deleteresult.acknowledged) {
+              res.send({ message: "Deleted succesfully" });
+            }
+          })
+          .catch((err) => {
+            res.send({ message: 'server err' })
+          })
+      }
+    })
 
 })
-.catch(()=>{
- res.send({message:'server err'})
+server.post('/edit-product', upload.single('pimage'), (req, res) => {
+  const pid = req.body.pid;
+  const pname = req.body.pname;
+  const pdesc = req.body.pdesc;
+  const price = req.body.price;
+  const category = req.body.category;
+  const subCategory = req.body.subCategory;
+  let pimage = '';
+  if (req.file && req.file.path) {
+    pimage = req.file.path;
+  }
+  const swap = req.body.swap;
+  const userId = req.body.userId;
+  let editObj = {};
+  if (pname) {
+    editObj.pname = pname;
+  }
+  if (pname) {
+    editObj.pdesc = pdesc;
+  }
+  if (price) {
+    editObj.price = price;
+  }
+  if (category) {
+    editObj.category = category;
+  }
+  if (subCategory) {
+    editObj.subCategory = subCategory;
+  }
+  if (pimage) {
+    editObj.pimage = pimage;
+  }
+  if (swap) {
+    editObj.swap = swap;
+  }
+
+  Products.updateOne({ _id: pid }, editObj)
+
+    .then((result) => {
+      res.send({ message: 'Update saved', product: result });
+    })
+    .catch(() => {
+      res.send({ message: 'Server error' });
+    });
+});
+server.get('/add-to-cart', async (req, res) => {
+  const userId = req.query.userId;
+  const pid = req.query.pid;
+  await Products.updateOne({ _id: pid }, { $set: { isSwapdisplay: false } });
+  Users.updateOne({ _id: userId }, { $addToSet: { cart: pid } })
+    .then(() => {
+      res.status(200).send({ message: 'Added to Cart' });
+    })
+    .catch(() => {
+      res.status(500).send({ message: 'Server error' });
+    });
 })
+server.get('/cart', (req, res) => {
+  const userId = req.query.userId;
+  Users.findOne({ _id: userId }).populate({
+    path: 'cart',
+    match: { isSold: false, isSwapaccepted: false }
+  })
+    .then((result) => {
+      res.status(200).send({ message: 'Products found', product: result.cart });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: 'Server error' });
+    });
+
 })
-app.listen(port,()=>{
- console.log(`Example app listening on port ${port}`)
+server.get('/remove-from-cart', (req, res) => {
+  const pid = req.query.pid;
+  const userId = req.query.userId;
+
+
+  Users.updateOne({ _id: userId }, { $pull: { cart: pid } })
+    .then(() => {
+      res.status(200).send({ message: 'Removed from Cart' });
+    })
+    .catch(() => {
+      res.status(500).send({ message: 'Server error' });
+    });
 })
+server.get('/proceed', (req, res) => {
+  const pids = req.query.pids;
+  const userId = req.query.userId;
+  Products.updateMany(
+    { _id: { $in: pids } },
+    {
+      $set: {
+        isSold: true,
+        buyer: userId,
+      }
+    }
+  )
+
+    .then((deleteresult) => {
+      res.send({ message: "Proceed" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: "Server error", error: err.message });
+    })
+
+})
+server.post('/my-orders', async (req, res) => {
+  //console.log(req.body.userId);
+  try {
+    const userOrders = await Products.find({
+      buyer: req.body.userId, // Match the buyer with the given userId
+      $or: [
+        { isSold: true },   // First condition for OR
+        { isSwapaccepted: true } // Second condition for OR
+      ]
+    });
+    const userIds = userOrders.map(order => order.userId);
+    //console.log(userIds);
+    const sellers = await Users.find({ _id: { $in: userIds } });
+    // console.log(sellers);
+    const sellerInfo = sellers.map(seller => ({
+      _id: seller._id,
+      name: seller.name, // replace 'name' with the actual attribute you want
+      username: seller.username, // replace 'email' with the actual attribute you want
+      number: seller.number,
+    }));
+    res.send({ message: "Orders", myOrders: userOrders, users: sellerInfo });
+
+  }
+  catch (error) {
+    console.error('Error fetching orders or users:', error);
+    res.status(500).send({ message: 'Server error' });
+  }
+});
+server.post('/my-orders-cancel', async (req, res) => {
+  console.log(req.body.productid);
+  Products.updateOne(
+    { _id: req.body.productid },
+    {
+      $set: {
+        isSold: false,
+        buyer: "",
+      }
+    }
+  )
+    .then((deleteresult) => {
+      res.send({ message: "deleted" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: "Server error", error: err.message });
+    })
+});
+server.post('/add-to-swap', async (req, res) => {
+  //console.log(req.body.pid);
+  await Products.updateOne(
+    { _id: req.body.pid },
+    {
+      $set: {
+        isSwapdisplay: true
+      }
+    }
+  )
+    .then((deleteresult) => {
+      res.send({ message: "added to swap" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: "Server error", error: err.message });
+    })
+});
+server.post('/update-swap', async (req, res) => {
+  //console.log(req.body.pid);
+  //console.log(req.body.userId);
+  await Products.updateOne(
+    { _id: req.body.pid },
+    {
+      $set: {
+        isSwapaccepted: true,
+        buyer: req.body.userId,
+        swapproduct: req.body.swapid
+      }
+    }
+  )
+    .then((deleteresult) => {
+      res.send({ message: " swap updated" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: "Server error", error: err.message });
+    })
+});
+server.post('/seller-confirmation', async (req, res) => {
+  //console.log(req.body.pid);
+  //console.log(req.body.userId);
+  //const pids= [res.body.pid, res.body.swapid]
+  await Products.updateOne(
+    { _id: req.body.pid },
+    {
+      $set: {
+        isSold: true
+      }
+    }
+  )
+    .then((deleteresult) => {
+      res.send({ message: " swap confirmed" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: "Server error", error: err.message });
+    })
+});
+server.post('/seller-rejection', async (req, res) => {
+  //console.log(req.body.pid);
+  //console.log(req.body.userId);
+  await Products.updateOne(
+    { _id: req.body.pid },
+    {
+      $set: {
+        isSwapaccepted: false
+      }
+    }
+  )
+    .then((deleteresult) => {
+      res.send({ message: " swap confirmed" });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: "Server error", error: err.message });
+    })
+});
+server.listen(8080, () => {
+  console.log('server started');
+});
