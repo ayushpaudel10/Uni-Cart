@@ -21,27 +21,50 @@ const [newPassword, setnewpassword]=useState("");
     const [oldpassword, setoldpassword]=useState("");
     const navigate=useNavigate();
     const id= localStorage.getItem('userId');
-    const changepassword=(e)=>{
+    const changepassword= async (e)=>{
         e.preventDefault();
-        if (confirm===newPassword){
-        const url='http://localhost:8000/change-password';
-        const data={newPassword,oldpassword, id};
+        // if (confirm===newPassword){
+        // const url='http://localhost:8000/change-password';
+        // const data={newPassword,oldpassword, id};
 
-        axios.post(url,data)
-        .then((res)=>{
-           console.log(res.data.message) ;
-           if(res.data.message)
-           {
-            alert(res.data.message)
-           }
-        })
-        .catch((err)=>{
-            console.log(err)
-            alert('SERVER ERR')
-        })}
-        else{
+        // axios.post(url,data)
+        // .then((res)=>{
+        //    console.log(res.data.message) ;
+        //    if(res.data.message)
+        //    {
+        //     alert(res.data.message)
+        //    }
+        // })
+        // .catch((err)=>{
+        //     console.log(err)
+        //     alert('SERVER ERR')
+        // })}
+        // else{
+        //     alert('Passwords do not match');
+        // }}
+        if (confirm !== newPassword) {
             alert('Passwords do not match');
-        }}
+            return;
+        }
+    
+        try {
+            const url = 'http://localhost:8000/change-password';
+            const data = { newPassword, oldpassword, id };
+    
+            console.log("Sending request:", data); // Debugging step
+    
+            const res = await axios.post(url, data);
+            
+            console.log("Response:", res.data); // Debugging step
+    
+            if (res.data.message) {
+                alert(res.data.message);
+            }
+        } catch (err) {
+            console.error("Error:", err);
+            alert('SERVER ERR');
+        }
+    };
 
 const showModal=()=>{
     document.querySelector('.overlay').classList.add('showoverlay');  

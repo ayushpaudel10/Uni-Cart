@@ -151,35 +151,28 @@
     color: red;
 }
 .preset-images {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-    gap: 15px;
-    justify-content: center;
-    align-items: center;
-    margin-top: 15px;
+    display: flex;
+    flex-direction: row; /* Arrange items in a row */
+    gap: 10px; /* Space between images */
+    margin-top: 10px;
 }
 
 .preset-image {
-    width: 90px;
-    height: 90px;
-    object-fit: cover;
+    width: 50px; /* Adjust size as needed */
+    height: 50px;
     border-radius: 50%;
-    border: 3px solid transparent;
-    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     cursor: pointer;
+    transition: transform 0.2s ease-in-out;
 }
 
 .preset-image:hover {
-    transform: scale(1.1);
-    border-color: #007bff;
-    box-shadow: 0px 4px 10px rgba(0, 123, 255, 0.4);
+    transform: scale(1.1); /* Slight zoom effect on hover */
 }
 
-.preset-image.selected {
-    border-color: #007bff;
-    box-shadow: 0px 4px 12px rgba(0, 123, 255, 0.6);
-    transform: scale(1.15);
+.selected {
+    border: 3px solid #007bff; /* Highlight selected image */
 }
+
 
 /* Media Queries for Responsiveness */
 

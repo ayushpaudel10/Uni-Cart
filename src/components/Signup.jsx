@@ -18,7 +18,7 @@ function Signup() {
     const [loading, setLoading] = useState(false);
     const [number, setnumber]=useState('');
     const [imageOption, setImageOption] = useState("preset"); // Default to preset images
-const [selectedImage, setSelectedImage] = useState(avatar1);
+//const [selectedImage, setSelectedImage] = useState(avatar1);
 const [selectedPresetId, setSelectedPresetId] = useState(null); // To store the selected preset ID
 const presetImages = [
 
@@ -29,9 +29,9 @@ const presetImages = [
     const navigate = useNavigate();
     const handleSignup = async() => {
         setMessage("");
-        let finalImage = imageOption === "preset" ? selectedPresetId : image; // Choose preset image or uploaded file
-        console.log("Final image before submission:", finalImage); // Debugging line
-        if (!username || !password || !finalImage) {
+        //let finalImage = imageOption === "preset" ? selectedPresetId : image; // Choose preset image or uploaded file
+        //console.log("Final image before submission:", finalImage); // Debugging line
+        if (!username || !password || !selectedPresetId) {
           setMessage("Please fill out all fields and select or upload an image.");
           return;
       }
@@ -47,14 +47,15 @@ const presetImages = [
         formData.append("namee", namee);
         formData.append("number", number);
         // Append the correct image (preset or uploaded)
-    if (imageOption === "preset") {
-      formData.append("profilePicId", finalImage); // If preset, send id
-  } else {
-      formData.append("profilePic", finalImage); // If uploaded, send file
-  }
-  for (let [key, value] of formData.entries()) {
-    console.log(`${key}:`, value);
-}
+//     if (imageOption === "preset") {
+//       formData.append("profilePicId", finalImage); // If preset, send id
+//   } else {
+//       formData.append("profilePic", finalImage); // If uploaded, send file
+//   }
+//   for (let [key, value] of formData.entries()) {
+//     console.log(`${key}:`, value);
+// }
+formData.append("profilePicId", selectedPresetId); // Only preset images
 
     try {
         const res = await axios.post("http://localhost:8000/signup",formData, {
@@ -85,10 +86,17 @@ const presetImages = [
           setMessage("Invalid verification code. Please try again.");
         }
       };
-      const handlePresetImageSelection = (imgObj) => {
-        setSelectedImage(imgObj.src);
-        setSelectedPresetId(imgObj.id); // Store the corresponding ID
-        setImage(null); // Clear uploaded image if a preset is chosen
+      // const handlePresetImageSelection = (imgObj) => {
+      //   setSelectedImage(imgObj.src);
+      //   setSelectedPresetId(imgObj.id); // Store the corresponding ID
+      //   setImage(null); // Clear uploaded image if a preset is chosen
+      // };
+      const handleBlur = () => {
+        if (!/^\d+(\.\d+)?$/.test(number) && number.length !== 10) {
+          setMessage("Phone number must be exactly 10 digits.");
+        } else {
+          setMessage("");
+        }
       };
     
     return<>
@@ -121,6 +129,9 @@ const presetImages = [
 
                        <label className='signuplabel'>Phone Number</label>
                        <input className='signupinputphone' placeholder='Enter your phone number' type="text" value={number}
+                            onBlur={handleBlur} // Validate on losing focus
+                            maxLength={10} // Hard limit of 10 characters
+                            minLength={10}
                             onChange={(e) => {
                                 setnumber(e.target.value)
                             }} />
@@ -145,54 +156,20 @@ const presetImages = [
                                 onChange={(e) => setImage(e.target.files[0])} /> */}
 
                             {/* Toggle between preset images and file upload */}
-  <div className="image-selection">
-    <input
-      type="radio"
-      id="preset"
-      name="imageOption"
-      value="preset"
-      checked={imageOption === "preset"}
-      onChange={() => setImageOption("preset")}
-    />
-    <label htmlFor="preset">Choose from preset images</label>
-
-    <input
-      type="radio"
-      id="upload"
-      name="imageOption"
-      value="upload"
-      checked={imageOption === "upload"}
-      onChange={() => setImageOption("upload")}
-    />
-    <label htmlFor="upload">Upload your own image</label>
-  </div>
-
-  {/* If user chooses preset images */}
-  {imageOption === "preset" && (
-    <div className="preset-images">
-      {presetImages.map((imgObj) => (
-        <img
-        key={imgObj.id}
-        src={imgObj.src}
-        alt={`Preset ${imgObj.id}`}
-        className={`preset-image ${selectedImage === imgObj.src ? "selected" : ""}`}
-          onClick={() => handlePresetImageSelection(imgObj)}
-        />
-      ))}
-    </div>
-  )}
-
-  {/* If user chooses to upload their own image */}
-  {imageOption === "upload" && (
-    <input
-      className='signupinput'
-      type="file"
-      accept="image/*"
-      onChange={(e) => setImage(e.target.files[0])}
-    />
-  )}    
+                            <div className="preset-images">
+                                {presetImages.map((imgObj) => (
+                                    <img
+                                        key={imgObj.id}
+                                        src={imgObj.src}
+                                        alt={`Preset ${imgObj.id}`}
+                                        className={`preset-image ${selectedPresetId === imgObj.id ? "selected" : ""}`}
+                                        onClick={() => setSelectedPresetId(imgObj.id)}
+                                    />
+                                ))}
+                            </div>
                         </div>
-                    <button className='signupbutton'onClick={handleSignup} disabled={loading}>{loading ? "Signing Up..." : "Sign Up"}</button>
+
+                    <button className='signupbutton'onClick={handleSignup} disabled={loading || message}>{loading ? "Signing Up..." : "Sign Up"}</button>
                     {!isVerifying && (
                     <p className='signupparagraph'>
                         Already Have An Account? Login <Link to="/login">here</Link>.

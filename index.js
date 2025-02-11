@@ -81,6 +81,7 @@ app.use(cors({
   origin: 'http://localhost:3000', // Replace with your frontend URL
   methods: ['GET', 'POST'],
 }));
+app.use(express.json());
 
 
 app.get('/search',(req,res)=>{
@@ -258,23 +259,6 @@ app.post('/signup', upload.single('profilePic'), async (req, res) => {
  //const profilePic = req.file ? req.file.path : null;
    // Handle preset image OR uploaded file
    const { username, password, namee, number, profilePicId } = req.body;
-  //  let profilePic = req.body.profilePicUrl; // Preset image from frontend
-  //  if (!profilePic && req.file) {
-  //    profilePic = req.file.path; // If file uploaded, use file path
-  //  }
-//   const username = req.body.username;
-//   const password = req.body.password;
-//   const name = req.body.name;
-//   const number = req.body.number;
-
-//   // Handle profile picture (either preset ID or uploaded file path)
-//   let profilePicId = req.body.profilePicId || null; // Store preset image ID
-//   let profilePicPath = null; // Store uploaded image path
-//   if (!profilePicId && req.file) {
-//     profilePicPath = req.file.path.replace(/\\/g, "/"); // Ensure correct path format
-// }
-
-
   try {
     const existingUser = await Users.findOne({ username });
     if (existingUser) {
@@ -441,7 +425,9 @@ app.post('/login', async (req, res) => {
       return res.status(400).send({ message: 'Please verify your email before logging in.' });
     }
 
-    const isPasswordValid = bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log("Password Match:", isPasswordValid); // Debugging
+
     if (!isPasswordValid) {
       return res.status(400).send({ message: 'Incorrect password' });
     }
@@ -454,25 +440,63 @@ app.post('/login', async (req, res) => {
   }
 });
 app.post('/change-password', async (req, res) => {
+  // try {
+  //   const { id, oldpassword, newPassword } = req.body;
+  //   const user = await Users.findOne({ _id: id });
+
+  //   if (!user) {
+  //     return res.send({ message: 'User not found' });
+  //   }
+  //   const isMatch = await bcrypt.compare(oldpassword, user.password);
+
+  //   if (!isMatch) {
+  //     return res.send({ message: 'Current password is incorrect' });
+  //   }
+  //   const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+  //     await Users.updateOne(
+  //     { _id: id },
+  //     { $set: { password: hashedPassword } }
+  //   );
+  //   res.send({ message: 'Password changed successfully' });
+  // } catch (err) {
+  //   res.send({ message: 'Server error' });
+  // }
   try {
+    console.log("Received data:", req.body); // Debugging step
     const { id, oldpassword, newPassword } = req.body;
+
+    if (!id || !oldpassword || !newPassword) {
+      return res.send({ message: 'All fields are required' });
+    }
+
     const user = await Users.findOne({ _id: id });
 
     if (!user) {
       return res.send({ message: 'User not found' });
     }
-    const isMatch = await bcrypt.compare(oldpassword, user.password);
 
+    const isMatch = await bcrypt.compare(oldpassword, user.password);
     if (!isMatch) {
       return res.send({ message: 'Current password is incorrect' });
     }
-    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-      await Users.updateOne(
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    //await Users.updateOne({ _id: id }, { $set: { password: hashedPassword } });
+    console.log("New Hashed Password:", hashedPassword); // Debugging
+
+    const updateResult = await Users.updateOne(
       { _id: id },
       { $set: { password: hashedPassword } }
     );
+
+    console.log("Update Result:", updateResult); // Debugging
+    if (updateResult.modifiedCount === 0) {
+      return res.send({ message: 'Password update failed' });
+    }
+
     res.send({ message: 'Password changed successfully' });
   } catch (err) {
+    console.error("Error in change-password:", err);
     res.send({ message: 'Server error' });
   }
 });
